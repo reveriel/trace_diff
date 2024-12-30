@@ -49,6 +49,7 @@ cc_test(
         "@googletest//:gtest_main",
     ],
     tags = ["coverage"],
+    defs = ["ENABLE_TRACE_DIFF_LOG"],
 )
 
 refresh_compile_commands(

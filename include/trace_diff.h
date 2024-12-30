@@ -8,8 +8,48 @@
 #include <string>
 #include <atomic>
 #include <set>
+#include <vector>
+#include <map>
+#include <unordered_set>
+#include <unordered_map>
 
 namespace TraceDiff {
+
+// Forward declarations of container serialization
+template<typename T>
+std::string serialize_container(const std::vector<T>& vec);
+
+template<typename K, typename V>
+std::string serialize_container(const std::map<K,V>& map);
+
+template<typename T>
+std::string serialize_container(const std::set<T>& set);
+
+template<typename T>
+std::string serialize_container(const std::unordered_set<T>& set);
+
+template<typename K, typename V>
+std::string serialize_container(const std::unordered_map<K,V>& map);
+
+// Type traits to detect container types
+template<typename T, typename = void>
+struct is_container : std::false_type {};
+
+template<typename T>
+struct is_container<std::vector<T>> : std::true_type {};
+
+template<typename K, typename V>
+struct is_container<std::map<K,V>> : std::true_type {};
+
+template<typename T>
+struct is_container<std::set<T>> : std::true_type {};
+
+template<typename T>
+struct is_container<std::unordered_set<T>> : std::true_type {};
+
+template<typename K, typename V>
+struct is_container<std::unordered_map<K,V>> : std::true_type {};
+
 
 class Logger {
 private:
@@ -64,12 +104,75 @@ public:
         }
         
         std::stringstream ss;
-        ss << counter_ << ":" << log_prefix_ << ":" << field_name << ": " << value << "\n";
+        ss << counter_ << ":" << log_prefix_ << ":" << field_name << ": ";
+        
+        // Use container serialization if it's a container type
+        if constexpr (is_container<T>::value) {
+            ss << serialize_container(value);
+        } else {
+            ss << value;
+        }
+        ss << "\n";
         
         log_file_ << ss.str();
         log_file_.flush();
     }
 };
+
+// Container serialization implementations
+template<typename T>
+std::string serialize_container(const std::vector<T>& vec) {
+    std::stringstream ss;
+    ss << "[";
+    for (size_t i = 0; i < vec.size(); ++i) {
+        if (i > 0) ss << ", ";
+        ss << vec[i];
+    }
+    ss << "]";
+    return ss.str();
+}
+
+template<typename K, typename V>
+std::string serialize_container(const std::map<K,V>& map) {
+    std::stringstream ss;
+    ss << "{";
+    bool first = true;
+    for (const auto& [key, value] : map) {
+        if (!first) ss << ", ";
+        ss << key << ": " << value;
+        first = false;
+    }
+    ss << "}";
+    return ss.str();
+}
+
+template<typename T>
+std::string serialize_container(const std::set<T>& set) {
+    std::stringstream ss;
+    ss << "[";
+    bool first = true;
+    for (const auto& value : set) {
+        if (!first) ss << ", ";
+        ss << value;
+        first = false;
+    }
+    ss << "]";
+    return ss.str();
+}
+
+template<typename T>
+std::string serialize_container(const std::unordered_set<T>& set) {
+    // covnert to std::set
+    std::set<T> ordered_set(set.begin(), set.end());
+    return serialize_container(ordered_set);
+}
+
+template<typename K, typename V>
+std::string serialize_container(const std::unordered_map<K,V>& map) {
+    // covnert to std::map
+    std::map<K,V> ordered_map(map.begin(), map.end());
+    return serialize_container(ordered_map);
+}
 
 // Static member initialization
 std::atomic<uint64_t> Logger::counter_{1};

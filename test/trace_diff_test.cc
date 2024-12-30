@@ -117,5 +117,41 @@ TEST_F(TraceDiffTest, DifferentTypes) {
     EXPECT_TRUE(log_content.find("bool_field: 1") != std::string::npos);
 }
 
+// Test containers
+TEST_F(TraceDiffTest, Containers) {
+    Logger::set_log_prefix("p1");
+    
+    std::vector<int> vec = {1, 2, 3};
+    TRACE_DIFF_LOG("vector_field", vec);
+    
+    std::map<std::string, int> map = {{"a", 1}, {"b", 2}, {"c", 3}};
+    TRACE_DIFF_LOG("map_field", map);
+    
+    std::set<int> set = {1, 2, 3};
+    TRACE_DIFF_LOG("set_field", set);
+    
+    std::string log_content = ReadLogFile("p1");
+
+    EXPECT_TRUE(log_content.find("vector_field: [1, 2, 3]") != std::string::npos);
+    EXPECT_TRUE(log_content.find("map_field: {a: 1, b: 2, c: 3}") != std::string::npos);
+    EXPECT_TRUE(log_content.find("set_field: [1, 2, 3]") != std::string::npos);
+} 
+
+// Test unordered containers, they should be printed as ordred so we can compare
+TEST_F(TraceDiffTest, UnorderedContainers) {
+    Logger::set_log_prefix("p1");
+    
+    std::unordered_map<std::string, int> map = {{"a", 1}, {"b", 2}, {"c", 3}};
+    TRACE_DIFF_LOG("unordered_map_field", map);
+    
+    std::unordered_set<int> set = {1, 2, 3};
+    TRACE_DIFF_LOG("unordered_set_field", set);
+    
+    std::string log_content = ReadLogFile("p1");
+    
+    EXPECT_TRUE(log_content.find("unordered_map_field: {a: 1, b: 2, c: 3}") != std::string::npos);
+    EXPECT_TRUE(log_content.find("unordered_set_field: [1, 2, 3]") != std::string::npos);
+}
+
 }  // namespace
 }  // namespace TraceDiff
