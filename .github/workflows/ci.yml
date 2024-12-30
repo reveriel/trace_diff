@@ -26,7 +26,7 @@ jobs:
       run: bazel build //...
 
     - name: Test
-      run: bazel test //...
+      run: bazel test //:trace_diff_test --copt=-DENABLE_TRACE_DIFF_LOG
 
     - name: Generate Coverage Report
       run: |

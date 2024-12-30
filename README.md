@@ -1,14 +1,86 @@
-# Bazel C++ Project Template
+# Trace Diff
 
-[![CI](https://github.com/reveriel/bazel_template/actions/workflows/ci.yml/badge.svg)](https://github.com/reveriel/bazel_template/actions)
-[![codecov](https://codecov.io/gh/reveriel/bazel_template/branch/main/graph/badge.svg)](https://codecov.io/gh/reveriel/bazel_template)
+[![CI](https://github.com/reveriel/trace_diff/actions/workflows/ci.yml/badge.svg)](https://github.com/reveriel/trace_diff/actions)
+[![codecov](https://codecov.io/gh/reveriel/trace_diff/branch/main/graph/badge.svg)](https://codecov.io/gh/reveriel/trace_diff)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![C++17](https://img.shields.io/badge/C%2B%2B-17-blue.svg)](https://en.wikipedia.org/wiki/C%2B%2B17)
 [![Bazel](https://img.shields.io/badge/Build%20with-Bazel-43A047.svg)](https://bazel.build/)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/reveriel/bazel_template/pulls)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/reveriel/trace_diff/pulls)
 [![Code Style](https://img.shields.io/badge/code%20style-clang--format-blue.svg)](https://clang.llvm.org/docs/ClangFormat.html)
 
-A modern C++ project template using Bazel build system, featuring comprehensive testing, code coverage, and development tools integration.
+
+TraceDiff 考虑**库重写的 diff 问题， 在不需要 diff 时，也可以作为 普通的 log 使用
+
+diff 方式是用同样的方式调用 新库 和 旧库， 并比较结果。
+
+在 最终结果不一致时，需要打印 库的内部 数据， 方便排查问题。
+
+本 library 提供打印 log 的接口， 方便排查问题。
+
+使用本库时需要确保请求并发数为 1. 避免 不同请求的 log 交叉打印。
+
+
+## Usage
+
+1. lib 入口
+
+``` cpp
+TraceDiff::set_log_prefix("p1");
+call_old_lib();
+TraceDiff::set_log_prefix("p2");
+call_new_lib();
+```
+
+The counter will automatically increment when we start a new cycle of prefixes. For example:
+
+``` cpp
+TraceDiff::set_log_prefix("a");  // counter = 1
+TraceDiff::set_log_prefix("b");  // counter = 1
+TraceDiff::set_log_prefix("c");  // counter = 1
+TraceDiff::set_log_prefix("a");  // counter = 2, starts new cycle
+TraceDiff::set_log_prefix("b");  // still counter = 2
+TraceDiff::set_log_prefix("c");  // still counter = 2
+TraceDiff::set_log_prefix("a");  // counter = 3, starts new cycle
+```
+
+2. new_lib and old_lib 中 使用
+
+``` cpp
+TRACE_DIFF_LOG("field_name", field_value);
+```
+
+会在 `tracediff_p1.log`, `tracediff_p2.log` 中打印 如下内容
+
+cnt:prefix:field_name: field_value
+
+例如：
+
+```
+1:p1:gids_before  1,3,4,5
+1:p1:gids_after: 1,3
+1:p2:gids_before: 1,2,4,5
+1:p2:gids_after: 1,3
+2:p1:gids_before: 1,3,4,5
+2:p1:gids_after: 1,3
+2:p2:gids_before: 1,2,4,5
+2:p2:gids_after: 1,3
+```
+
+
+用户负责确保两个 lib 使用同样的 TRACE_DIFF_LOG 宏。
+使得 cnt 值相同时， 不同 prefix 的 log 条数是相同的， 顺序可能有变化。
+
+然后使用本目录下的脚本对 log 文件进行 diff 的分析, 我们会将 后者的 log 顺序调整成 与 前者一致， 便于分析。
+
+
+## Enabling Logging
+
+To enable logging, define the `ENABLE_TRACE_DIFF_LOG` macro either in your code or as a compilation flag:
+
+```cpp
+#define ENABLE_TRACE_DIFF_LOG
+```
+
 
 > **Note**: To make the badges work in your fork:
 > 1. Replace "reveriel" in badge URLs with your GitHub username
@@ -20,17 +92,6 @@ A modern C++ project template using Bazel build system, featuring comprehensive 
 >    - The token is required for the Codecov GitHub Action v5
 > 4. The CI workflow will automatically upload coverage reports to Codecov
 
-## Features
-
-- Modern C++17 support
-- Bazel build system with Bzlmod dependency management
-- GoogleTest integration for unit testing
-- Code coverage reporting with LCOV
-- Multiple build configurations (Debug/Release)
-- Sanitizer support (ASan, TSan, UBSan)
-- VSCode DevContainer configuration
-- GitHub Actions CI integration
-- Clang tooling support
 
 ## Prerequisites
 

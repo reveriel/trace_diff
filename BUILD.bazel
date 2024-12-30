@@ -16,6 +16,13 @@ cc_library(
     visibility = ["//visibility:public"],
 )
 
+cc_library(
+    name = "trace_diff",
+    hdrs = ["include/trace_diff.h"],
+    includes = ["include"],
+    visibility = ["//visibility:public"],
+)
+
 cc_binary(
     name = "main",
     srcs = ["src/main.cpp"],
@@ -29,6 +36,16 @@ cc_test(
     srcs = glob(["test/calculator/*.cpp"]),
     deps = [
         ":calculator",
+        "@googletest//:gtest_main",
+    ],
+    tags = ["coverage"],
+)
+
+cc_test(
+    name = "trace_diff_test",
+    srcs = ["test/trace_diff_test.cc"],
+    deps = [
+        ":trace_diff",
         "@googletest//:gtest_main",
     ],
     tags = ["coverage"],
