@@ -1,0 +1,53 @@
+# Bazel
+/bazel-*
+/compile_commands.json
+.bazelrc.user
+
+# C++ build artifacts
+*.o
+*.a
+*.so
+*.dylib
+*.dll
+*.exe
+
+# IDE specific files
+.idea/
+.vscode/*
+!.vscode/launch.json
+!.vscode/tasks.json
+*.swp
+*.swo
+.DS_Store
+.vs/
+
+# Clangd cache
+.cache/
+
+# Build directories
+build/
+dist/
+out/
+
+# Dependency directories
+external/
+third_party/
+
+# Debug files
+*.dSYM/
+*.su
+*.idb
+*.pdb
+
+# Core dumps
+core
+
+# Coverage reports
+coverage_report/
+*.gcov
+*.gcda
+*.gcno
+*.info
+*.dat
+*.profraw
+*.profdata

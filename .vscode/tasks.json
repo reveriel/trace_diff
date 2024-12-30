@@ -1,0 +1,30 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build Debug",
+            "type": "shell",
+            "command": "bazel",
+            "args": [
+                "build",
+                "--compilation_mode=dbg",
+                "//:main"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Build Tests Debug",
+            "type": "shell",
+            "command": "bazel",
+            "args": [
+                "build",
+                "--compilation_mode=dbg",
+                "//:calculator_test"
+            ],
+            "group": "build"
+        }
+    ]
+}

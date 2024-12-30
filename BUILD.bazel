@@ -1,0 +1,43 @@
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library", "cc_test")
+load("@hedron_compile_commands//:refresh_compile_commands.bzl", "refresh_compile_commands")
+
+package(default_visibility = ["//visibility:public"])
+
+exports_files([
+    "LICENSE",
+    "README.md",
+])
+
+cc_library(
+    name = "calculator",
+    srcs = glob(["src/calculator/*.cpp"]),
+    hdrs = glob(["include/calculator/*.h"]),
+    includes = ["include"],
+    visibility = ["//visibility:public"],
+)
+
+cc_binary(
+    name = "main",
+    srcs = ["src/main.cpp"],
+    deps = [
+        ":calculator",
+    ],
+)
+
+cc_test(
+    name = "calculator_test",
+    srcs = glob(["test/calculator/*.cpp"]),
+    deps = [
+        ":calculator",
+        "@googletest//:gtest_main",
+    ],
+    tags = ["coverage"],
+)
+
+refresh_compile_commands(
+    name = "refresh_compile_commands",
+    targets = {
+        "//...": "",
+    },
+    exclude_headers = "all",
+)

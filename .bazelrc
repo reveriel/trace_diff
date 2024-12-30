@@ -1,0 +1,70 @@
+# Platform configurations
+build:linux --cxxopt=-std=c++17
+build:macos --cxxopt=-std=c++17
+build:windows --cxxopt=/std:c++17
+
+# Common flags
+build --enable_platform_specific_config
+build --incompatible_strict_action_env
+build --cxxopt=-Wall
+build --cxxopt=-Wextra
+build --cxxopt=-Wpedantic
+
+# Debug configuration
+build:debug --compilation_mode=dbg
+build:debug --copt=-g
+build:debug --strip=never
+
+# Release configuration
+build:release --compilation_mode=opt
+build:release --copt=-O3
+build:release --strip=always
+
+# Coverage options
+coverage --compilation_mode=dbg
+coverage --instrument_test_targets=false
+coverage --combined_report=lcov
+coverage --test_output=all
+coverage --instrumentation_filter="//..."
+coverage --instrumentation_filter="-//external/..."
+
+# Address sanitizer
+build:asan --strip=never
+build:asan --copt=-fsanitize=address
+build:asan --copt=-DADDRESS_SANITIZER
+build:asan --copt=-O1
+build:asan --copt=-g
+build:asan --copt=-fno-omit-frame-pointer
+build:asan --linkopt=-fsanitize=address
+
+# Thread sanitizer
+build:tsan --strip=never
+build:tsan --copt=-fsanitize=thread
+build:tsan --copt=-DTHREAD_SANITIZER
+build:tsan --copt=-O1
+build:tsan --copt=-g
+build:tsan --copt=-fno-omit-frame-pointer
+build:tsan --linkopt=-fsanitize=thread
+
+# Memory sanitizer
+build:msan --strip=never
+build:msan --copt=-fsanitize=memory
+build:msan --copt=-DMEMORY_SANITIZER
+build:msan --copt=-O1
+build:msan --copt=-g
+build:msan --copt=-fno-omit-frame-pointer
+build:msan --linkopt=-fsanitize=memory
+
+# Undefined behavior sanitizer
+build:ubsan --strip=never
+build:ubsan --copt=-fsanitize=undefined
+build:ubsan --copt=-DUNDEFINED_SANITIZER
+build:ubsan --copt=-O1
+build:ubsan --copt=-g
+build:ubsan --copt=-fno-omit-frame-pointer
+build:ubsan --linkopt=-fsanitize=undefined
+
+# Development convenience settings
+build --show_timestamps
+test --test_output=errors
+test --test_verbose_timeout_warnings

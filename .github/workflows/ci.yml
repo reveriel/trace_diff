@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Install Bazelisk
+      run: |
+        curl -LO "https://github.com/bazelbuild/bazelisk/releases/download/v1.18.0/bazelisk-linux-amd64"
+        chmod +x bazelisk-linux-amd64
+        sudo mv bazelisk-linux-amd64 /usr/local/bin/bazel
+
+    - name: Install lcov
+      run: sudo apt-get install -y lcov
+
+    - name: Build
+      run: bazel build //...
+
+    - name: Test
+      run: bazel test //...
+
+    - name: Generate Coverage Report
+      run: |
+        bazel coverage //...
+        genhtml "$(bazel info output_path)/_coverage/_coverage_report.dat" -o coverage_report
+
+    - name: Upload Coverage Report
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-report
+        path: coverage_report/
+
+    - name: Upload Coverage to Codecov
+      uses: codecov/codecov-action@v5
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        files: bazel-out/_coverage/_coverage_report.dat
+        fail_ci_if_error: true

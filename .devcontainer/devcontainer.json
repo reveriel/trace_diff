@@ -1,0 +1,34 @@
+{
+    "name": "C++ Development Container",
+    "build": {
+        "dockerfile": "Dockerfile"
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-vscode.cpptools",
+                "ms-vscode.cpptools-extension-pack",
+                "bazelbuild.vscode-bazel",
+                "ms-vscode.cmake-tools",
+                "twxs.cmake",
+                "xaver.clang-format",
+                "kylinideteam.cppdebug"
+            ],
+            "settings": {
+                "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+                "C_Cpp.formatting": "clangFormat",
+                "editor.formatOnSave": true,
+                "files.trimTrailingWhitespace": true,
+                "C_Cpp.debugShortcut": true
+            }
+        }
+    },
+    "remoteUser": "vscode",
+    "features": {
+        "ghcr.io/devcontainers/features/common-utils:2": {
+            "installZsh": "true",
+            "username": "vscode",
+            "upgradePackages": "true"
+        }
+    }
+}
